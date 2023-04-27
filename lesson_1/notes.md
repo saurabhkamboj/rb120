@@ -47,7 +47,7 @@ When defining a class, we focus on two things:
 
 > State refers to the data associated with individual objects.
 
-- Constructor
+- Constructor (`#initialize`)
 - Instance variable
 - Instance method
 - Accessor method
