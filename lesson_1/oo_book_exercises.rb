@@ -68,7 +68,6 @@ puts boleno.current_speed
 # alternate
 
 class MyCar
-
   def initialize(year, color, model)
     @year = year
     @color = color
@@ -105,7 +104,6 @@ puts boleno.current_speed
 
 
 class MyCar
-
   attr_accessor :color
   attr_reader :model
 
@@ -145,7 +143,6 @@ puts boleno.year
 # You want to create a nice interface that allows you to accurately describe the action you want your program to perform. Create a method called spray_paint that can be called on an object and will modify the color of the car.
 
 class MyCar
-
   attr_reader :color
   attr_reader :year
 
@@ -187,7 +184,6 @@ puts boleno.year
 # alternate
 
 class MyCar
-
   attr_accessor :color
   attr_reader :year
 
@@ -225,3 +221,73 @@ puts boleno.color
 boleno.spray_paint('grey')
 puts boleno.color
 puts boleno.year
+
+# Exercise 3.1
+
+# Add a class method to your MyCar class that calculates the gas mileage (i.e. miles per gallon) of any car.
+
+class MyCar
+  attr_accessor :color
+  attr_reader :year
+
+  def initialize(year, color, model)
+    @year = year
+    @color = color
+    @model = model
+    @speed = 0
+  end
+
+  def speed_up(number)
+    @speed += number
+  end
+
+  def brake(number)
+    @speed -= number
+  end
+
+  def shut_off
+    @speed = 0
+  end
+
+  def current_speed
+    @speed
+  end
+
+  def spray_paint(new_color)
+    self.color = new_color
+  end
+
+  def self.mileage(gallons, miles)
+    "#{miles / gallons}"
+  end
+end
+
+boleno = MyCar.new(2017, 'black', 'XR')
+
+puts boleno.color
+
+boleno.spray_paint('grey')
+puts boleno.color
+
+puts boleno.year
+
+puts MyCar.mileage(34, 450)
+
+# Exercise 3.2
+
+# Override the to_s method to create a user friendly print out of your object.
+
+class GoodDog
+  attr_accessor :name
+
+  def initialize(name)
+    @name = name
+  end
+
+  def to_s
+    "The dog's name is #{name}!"
+  end
+end
+
+sparky = GoodDog.new('Sparky')
+puts sparky
