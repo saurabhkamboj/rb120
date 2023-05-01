@@ -107,3 +107,5 @@ sparky.name = "Gorky"
 puts sparky.name
 puts sparky.speak
 ```
+
+- Class method

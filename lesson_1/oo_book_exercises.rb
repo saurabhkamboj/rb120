@@ -180,7 +180,7 @@ end
 boleno = MyCar.new(2017, 'black', 'XR')
 
 puts boleno.color
-boleno.color = 'grey'
+boleno.spray_paint = 'grey'
 puts boleno.color
 puts boleno.year
 
