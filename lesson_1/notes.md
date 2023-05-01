@@ -86,6 +86,8 @@ puts sparky.name
 puts sparky.speak
 ```
 
+> `#initialize` (Constructor) gets called everytime we instantiate a new object via the `#new` method.
+
 Example of using `#attr_accessor` method instead:
 
 ```ruby
@@ -109,3 +111,33 @@ puts sparky.speak
 ```
 
 - Class method
+
+> Class methods are where we put functionality that does not pertain to individual objects.
+
+Example of using a class variable.
+
+```ruby
+class SomeClass
+  @@number_of_cars = 0
+
+  def initialize
+    @@number_of_cars += 1
+  end
+
+  def self.number_of_cars
+    @@number_of_cars
+  end
+end
+
+p SomeClass.number_of_cars
+
+boleno = SomeClass.new
+ciaz = SomeClass.new
+
+p SomeClass.number_of_cars
+```
+
+- Constance - They only begin with a capital letter but rubyists prefer to make the entire variable uppercase.
+- Creating an instance of a class is creating an object of the class.
+- `#to_s`
+- Using `#self` inside a class but outside the instance method refers to the class itself.
