@@ -291,3 +291,154 @@ end
 
 sparky = GoodDog.new('Sparky')
 puts sparky
+
+# Exercise 4.1
+
+# Create a superclass called Vehicle for your MyCar class to inherit from and move the behavior that isn't specific to the MyCar class to the superclass. Create a constant in your MyCar class that stores information about the vehicle that makes it different from other types of Vehicles.
+
+# Then create a new class called MyTruck that inherits from your superclass that also has a constant defined that separates it from the MyCar class in some way.
+
+class Vehicle
+  attr_accessor :color
+  attr_reader :year
+
+  def speed_up(number)
+    @speed += number
+  end
+
+  def brake(number)
+    @speed -= number
+  end
+
+  def shut_off
+    @speed = 0
+  end
+
+  def current_speed
+    @speed
+  end
+
+  def initialize(year, color, model)
+    @year = year
+    @color = color
+    @model = model
+    @speed = 0
+  end
+
+  def spray_paint(new_color)
+    self.color = new_color
+  end
+
+  def self.mileage(gallons, miles)
+    "#{miles / gallons}"
+  end
+end
+
+class MyCar < Vehicle
+  MILEAGE = 14
+end
+
+class MyTruck < Vehicle
+  MILEAGE = 7
+end
+
+# Exercise 4.2
+
+# Add a class variable to your superclass that can keep track of the number of objects created that inherit from the superclass. Create a method to print out the value of this class variable as well.
+
+class Vehicle
+  @@number_of_vehicles = 0
+
+  def initialize
+    @@number_of_vehicles += 1
+  end
+
+  def self.number_of_vehicles
+    @@number_of_vehicles
+  end
+
+  def self.gas_mileage(gallons, miles)
+    puts "#{miles / gallons} miles per gallon of gas"
+  end
+end
+
+class MyCar < Vehicle
+  NUMBER_OF_DOORS = 4
+end
+
+class MyTruck < Vehicle
+  NUMBER_OF_DOORS = 2
+end
+
+car1 = MyCar.new
+car2 = MyCar.new
+truck1 = MyTruck.new
+
+puts Vehicle.number_of_vehicles
+
+# Exercise 4.3
+
+# Create a module that you can mix in to ONE of your subclasses that describes a behavior unique to that subclass.
+
+module Swimable
+  def swim
+    "I can swim!"
+  end
+end
+
+class Animal
+  @@number_of_animals = 0
+
+  def initialize
+    @@number_of_animals += 1
+  end
+
+  def self.number_of_animals
+    @@number_of_animals
+  end
+end
+
+class Dog < Animal
+  include Swimable
+end
+
+class Cat < Animal
+end
+
+# Exercise 4.4
+
+# Print to the screen your method lookup for the classes that you have created.
+
+module Swimable
+  def swim
+    "I can swim!"
+  end
+end
+
+class Animal
+  @@number_of_animals = 0
+
+  def initialize
+    @@number_of_animals += 1
+  end
+
+  def self.number_of_animals
+    @@number_of_animals
+  end
+end
+
+class Dog < Animal
+  include Swimable
+end
+
+class Cat < Animal
+end
+
+puts Dog.ancestors
+puts Cat.ancestors
+puts Animal.ancestors
+
+# Exercise 4.5
+
+# Move all of the methods from the MyCar class that also pertain to the MyTruck class into the Vehicle class. Make sure that all of your previous method calls are working when you are finished.
+
