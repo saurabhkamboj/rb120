@@ -196,3 +196,6 @@ puts kitty.speak # => Hello
 > Objects cannot be created from modules.
 
 - Method access control
+- Namespacing
+
+> To instantiate an object of a class contained within a module - `Transportation::Truck.new`
