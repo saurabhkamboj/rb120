@@ -532,4 +532,3 @@ bob = Student.new('Bob', 456)
 joe = Student.new('Joe', 789)
 
 puts "Well done!" if joe.better_grade_than?(bob)
-
