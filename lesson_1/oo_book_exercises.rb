@@ -438,7 +438,98 @@ puts Dog.ancestors
 puts Cat.ancestors
 puts Animal.ancestors
 
-# Exercise 4.5
+# Exercise 4.6
 
-# Move all of the methods from the MyCar class that also pertain to the MyTruck class into the Vehicle class. Make sure that all of your previous method calls are working when you are finished.
+# Write a method called age that calls a private method to calculate the age of the vehicle. Make sure the private method is not available from outside of the class. You'll need to use Ruby's built-in Time class to help.
+
+module Towable
+  def can_tow?(load)
+    load < 2000
+  end
+end
+
+class Vehicle
+  attr_accessor :color
+  attr_reader :year
+
+  def speed_up(number)
+    @speed += number
+  end
+
+  def brake(number)
+    @speed -= number
+  end
+
+  def shut_off
+    @speed = 0
+  end
+
+  def current_speed
+    @speed
+  end
+
+  def initialize(year, color, model)
+    @year = year
+    @color = color
+    @model = model
+    @speed = 0
+  end
+
+  def spray_paint(new_color)
+    self.color = new_color
+  end
+
+  def self.mileage(gallons, miles)
+    "#{miles / gallons}"
+  end
+
+  def age
+    age_of_vehicle < 1 ? "The vehicle is less than a year old." :
+    "The vehicle is #{age_of_vehicle} year(s) old."
+  end
+
+  private
+
+  def age_of_vehicle
+    Time.now.year - self.year
+  end
+end
+
+class MyCar < Vehicle
+  MILEAGE = 14
+end
+
+class MyTruck < Vehicle
+  include Towable
+
+  MILEAGE = 7
+end
+
+# Exercise 4.7
+
+# Create a class 'Student' with attributes name and grade. Do NOT make the grade getter public, so joe.grade will raise an error. Create a better_grade_than? method, that you can call like so...
+
+# puts "Well done!" if joe.better_grade_than?(bob)
+
+class Student
+  attr_accessor :name
+
+  def initialize(name, grade)
+    @name = name
+    @grade = grade
+  end
+
+  def better_grade_than?(other_student)
+    self.grade > other_student.grade
+  end
+
+  protected
+
+  attr_reader :grade
+end
+
+bob = Student.new('Bob', 456)
+joe = Student.new('Joe', 789)
+
+puts "Well done!" if joe.better_grade_than?(bob)
 
