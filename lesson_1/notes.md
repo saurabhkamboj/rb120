@@ -137,7 +137,7 @@ ciaz = SomeClass.new
 p SomeClass.number_of_cars
 ```
 
-- Constance - They only begin with a capital letter but rubyists prefer to make the entire variable uppercase.
+- Constants - They only begin with a capital letter but rubyists prefer to make the entire variable uppercase.
 - Creating an instance of a class is creating an object of the class.
 - `#to_s`
 - Using `#self` inside a class but outside the instance method refers to the class itself.
