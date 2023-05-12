@@ -11,7 +11,7 @@
 
   Nouns: player, move, rule
   Verbs: choose, compare
-  
+
   Organisation for nouns and verbs:
     Player
       Choose
@@ -24,44 +24,68 @@
 class Player
   attr_accessor :move, :name
 
-  def initialize(player_type)
-    @player_type = player_type
-    @move = nil
+  def initialize
     set_name
   end
+end
 
+class Human < Player
   def set_name
-    if human?
-      print "What should we call you? "
+    print "What should we call you? "
+    input = ''
 
-      loop do
-        self.name = gets.chomp
+    loop do
+      input = gets.chomp
 
-        break unless self.name.empty?
-        print "Error! You must enter a value: "
-      end
-    else
-      self.name = 'Computer'
+      break unless input.empty?
+      print "Error! You must enter a value: "
     end
+
+    self.name = input
   end
 
   def choose
-    if human?
-      print "Choose between rock, paper or scissor: "
+    print "Choose between rock, paper or scissor: "
+    input = ''
 
-      loop do
-        self.move = gets.chomp.downcase
+    loop do
+      input = gets.chomp.downcase
 
-        break if ['rock', 'paper', 'scissor'].include?(@move)
-        puts "Error! Please input a valid choice."
-      end
-    else
-      self.move = ['rock', 'paper', 'scissor'].sample
+      break if Move::VALUES.include?(input)
+      puts "Error! Please input a valid choice."
     end
+
+    self.move = Move.new(input)
+  end
+end
+
+class Computer < Player
+  def set_name
+    self.name = 'Computer'
   end
 
-  def human?
-    @player_type == :human
+  def choose
+    self.move = Move.new(Move::VALUES.sample)
+  end
+end
+
+class Move
+  attr_reader :value
+
+  VALUES = ['rock', 'paper', 'scissor']
+
+  def initialize(value)
+    @value = value
+  end
+
+  def >(other_move)
+    (@value == 'rock' && other_move.value == 'scissor') ||
+      (@value == 'scissor' && other_move.value == 'paper') ||
+      (@value == 'paper' && other_move.value == 'rock')
+  end
+
+  def to_s
+    @value.capitalize
   end
 end
 
@@ -70,8 +94,8 @@ class RPSGame
 
   def initialize
     display_welcome_message
-    @human = Player.new(:human)
-    @computer = Player.new(:computer)
+    @human = Human.new
+    @computer = Computer.new
   end
 
   def display_welcome_message
@@ -83,24 +107,15 @@ class RPSGame
   end
 
   def display_winner
-    puts "You chose #{human.move.capitalize}."
-    puts "The computer chose #{computer.move.capitalize}."
-    puts result(human.move, computer.move)
-  end
+    puts "You chose #{human.move}."
+    puts "The computer chose #{computer.move}."
 
-  def win?(move_1, move_2)
-    (move_1 == 'rock' && move_2 == 'scissor') ||
-      (move_1 == 'scissor' && move_2 == 'paper') ||
-      (move_1 == 'paper' && move_2 == 'rock')
-  end
-
-  def result(human_move, computer_move)
-    if win?(human_move, computer_move)
-      "You won!"
-    elsif win?(computer_move, human_move)
-      "Computer won!"
+    if human.move > computer.move
+      puts "You won!"
+    elsif computer.move > human.move
+      puts "Computer won!"
     else
-      "It's a tie."
+      puts "It's a tie."
     end
   end
 
