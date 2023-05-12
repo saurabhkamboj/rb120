@@ -1,4 +1,4 @@
-# RB120 notes
+# Lesson 1 notes
 
 - Encapsulation
 - Polymorphism
