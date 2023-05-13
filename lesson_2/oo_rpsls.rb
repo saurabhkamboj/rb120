@@ -19,9 +19,6 @@ require 'pry'
 
   Computer personalities
     We have a list of robot names for our Computer class, but other than the name, there's really nothing different about each of them. It'd be interesting to explore how to build different personalities for each robot. For example, R2D2 can always choose "rock". Or, "Hal" can have a very high tendency to choose "scissors", and rarely "rock", but never "paper". You can come up with the rules or personalities for each robot. How would you approach a feature like this?
-  
-    Breakdown
-     - 
 =end
 
 VALID_CHOICES = %w(rock paper scissors lizard spock)
