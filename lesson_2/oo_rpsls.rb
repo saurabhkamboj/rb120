@@ -193,7 +193,6 @@ class RPSGame
         Storable::Match.new
         human.move!
         computer.move!
-        # binding.pry
         display_winner
         display_score
         break if game_won?
