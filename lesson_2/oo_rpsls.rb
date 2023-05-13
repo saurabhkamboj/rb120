@@ -1,3 +1,5 @@
+require 'pry'
+
 =begin
   Keeping score
     Right now, the game doesn't have very much dramatic flair. It'll be more interesting if we were playing up to, say, 10 points. Whoever reaches 10 points first wins. Can you build this functionality? We have a new noun -- a score. Is that a new class, or a state of an existing class? You can explore both options and see which one works better.
@@ -19,6 +21,7 @@
     We have a list of robot names for our Computer class, but other than the name, there's really nothing different about each of them. It'd be interesting to explore how to build different personalities for each robot. For example, R2D2 can always choose "rock". Or, "Hal" can have a very high tendency to choose "scissors", and rarely "rock", but never "paper". You can come up with the rules or personalities for each robot. How would you approach a feature like this?
   
     Breakdown
+     - 
 =end
 
 VALID_CHOICES = %w(rock paper scissors lizard spock)
@@ -52,6 +55,27 @@ module Storable
       @@match += 1
       MOVES_HISTORY[@@game][@@match] = []
     end
+  end
+end
+
+module Movable
+  def ai_move(name)
+    case name
+    when 'Computron'
+      VALID_CHOICES.sample
+    when 'R2D2'
+      'rock'
+    when 'Hal'
+      [['rock'] * 2, ['paper'] * 5, 'scissors', 'lizard', 'spock'].sample
+    end
+  end
+
+  def computer_moves
+    MOVES_HISTORY.map do |game, matches|
+      matches.map do |match, moves|
+        moves[1]
+      end
+    end.flatten
   end
 end
 
@@ -108,12 +132,14 @@ class Human < Player
 end
 
 class Computer < Player
+  include Movable
+
   def set_name
-    self.name = 'Computer'
+    self.name = %w(Computron R2D2 Hal).sample
   end
 
   def move!
-    self.move = Move.new(VALID_CHOICES.sample)
+    self.move = Move.new(ai_move(name))
   end
 end
 
@@ -170,11 +196,12 @@ class RPSGame
         Storable::Match.new
         human.move!
         computer.move!
+        # binding.pry
         display_winner
         display_score
         break if game_won?
         
-        sleep 6
+        sleep 5
         system('clear') || system('cls')
       end
 
@@ -196,13 +223,13 @@ class RPSGame
 
   def display_winner
     puts "\nYou chose #{human.move}."
-    puts "The computer chose #{computer.move}."
+    puts "#{computer.name} chose #{computer.move}."
 
     if human.move > computer.move
       puts "You won!"
       human.score += 1
     elsif computer.move > human.move
-      puts "Computer won!"
+      puts "#{computer.name} won!"
       computer.score += 1
     else
       puts "It's a tie."
@@ -213,7 +240,7 @@ class RPSGame
   def display_score
     puts "\nScore
     #{human.name} - #{human.score}
-    Computer - #{computer.score}
+    #{computer.name} - #{computer.score}
     Ties - #{Score.games_tied}"
   end
 
@@ -221,7 +248,7 @@ class RPSGame
     if human.score == Score::WINNING_SCORE
       !(puts "\nYay...you won the game!")
     elsif computer.score == Score::WINNING_SCORE
-      !(puts "\nThe computer won the game!")
+      !(puts "\n#{computer.name} won the game!")
     else
       puts "\nNext round..."
     end
