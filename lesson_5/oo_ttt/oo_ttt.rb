@@ -10,6 +10,8 @@
 #   - Mark
 #   - Play
 
+require 'pry'
+
 module Displayable
   def display_welcome_message
     puts "TIC TAC TOE"
@@ -17,6 +19,8 @@ module Displayable
   end
 
   def display_board(board)
+    system('clear') || system('cls')
+    puts "You are #{human.marker}. Computer is #{computer.marker}!"
     puts ""
     puts "     |     |"
     puts "  #{board.get_square_at(1)}  |  #{board.get_square_at(2)}  |  #{board.get_square_at(3)}"
@@ -32,7 +36,12 @@ module Displayable
     puts ""
   end
 
-  def display_result
+  def display_result(board)
+    if board.someone_won?
+      puts "#{board.detect_winner} won!"
+    else
+      "It's a tie!"
+    end
   end
 
   def display_goodbye_message
@@ -41,57 +50,137 @@ module Displayable
 end
 
 class Board
+  WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] +
+                  [[1, 4, 7], [2, 5, 8], [3, 6, 9]] +
+                  [[1, 5, 9], [3, 5, 7]]
+  attr_reader :squares
+
   def initialize
-    @squares = (1..9).zip([Square.new(' ')] * 9).to_h
+    @squares = {}
+    reset
   end
 
   def get_square_at(key)
     @squares[key]
   end
+
+  def set_square_at(key, marker)
+    @squares[key].marker = marker
+  end
+
+  def unmarked_square_keys
+    squares.select { |_, square| square.unmarked? }.keys
+  end
+
+  def someone_won?
+    !!detect_winner
+  end
+
+  def detect_winner
+    WINNING_LINES.each do |line|
+      if line.all? { |key| squares[key].marker == TTTgame::HUMAN_MARKER }
+        return 'You'
+      elsif line.all? { |key| squares[key].marker == TTTgame::COMPUTER_MARKER }
+        return 'Computer'
+      end
+    end
+
+    nil
+  end
+
+  def full?
+    unmarked_square_keys.empty?
+  end
+
+  def reset
+    (1..9).each { |key| @squares[key] = Square.new }
+  end
 end
 
 class Square
-  def initialize(marker)
+  INITIAL_MARKER = ' '
+
+  attr_accessor :marker
+
+  def initialize(marker=INITIAL_MARKER)
     @marker = marker
   end
 
   def to_s
-    @marker
+    marker
+  end
+
+  def unmarked?
+    marker == INITIAL_MARKER
   end
 end
 
 class Player
-  def initialize
-    # Keep track of player's symbol
-  end
+  attr_reader :marker
 
-  def mark
+  def initialize(marker)
+    @marker = marker
   end
 end
 
 class TTTgame
+  HUMAN_MARKER = 'X'
+  COMPUTER_MARKER = 'O'
+
   include Displayable
 
-  attr_reader :board
+  attr_reader :board, :human, :computer
 
   def initialize
     @board = Board.new
+    @human = Player.new(HUMAN_MARKER)
+    @computer = Player.new(COMPUTER_MARKER)
+  end
+
+  def first_player_moves
+    print "Choose a square between #{board.unmarked_square_keys}: "
+    square = nil
+
+    loop do
+      square = gets.chomp.to_i
+      break if board.unmarked_square_keys.include?(square)
+      print "Error! Please inout a valid choice: "
+    end
+
+    board.set_square_at(square, human.marker)
+  end
+
+  def second_player_moves
+    board.set_square_at(board.unmarked_square_keys.sample, computer.marker)
+  end
+
+  def play_again?
+    print "Do you want to play again? "
+    input = gets.chomp.downcase
+
+    ['y', 'yes'].any?(input)
   end
 
   def play
     display_welcome_message
 
     loop do
-      display_board(board)
-      break
-      first_player_moves
-      break if someone_won? || board_full?
+      loop do
+        first_player_moves
+        break if board.someone_won? || board.full?
 
-      second_player_moves
-      break if someone_won? || board_full?
+        second_player_moves
+        break if board.someone_won? || board.full?
+        display_board(board)
+      end
+      
+      display_board(board)
+      display_result(board)
+      break unless play_again?
+      board.reset
+      puts "Let's play again!"
     end
 
-    display_result
     display_goodbye_message
   end
 end
