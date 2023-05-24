@@ -51,7 +51,7 @@ ALPHABETS = ('a'..'z').zip(1..26).to_h
 def letter_changes(string)
   string.split.map do |word|
     word.chars.map do |letter|
-      if ALPHABETS.keys.include?(letter.downcase)
+      if ALPHABETS.key?(letter.downcase)
         new_letter = change_letter(letter.downcase)
         letter.downcase == letter ? new_letter : new_letter.upcase
       else
@@ -74,22 +74,15 @@ end
 
 def letter_changes(string)
   string.chars.map do |letter|
-    if ALPHABETS.keys.include?(letter.downcase)
-      new_letter = change_letter(letter.downcase)
-      letter.downcase == letter ? new_letter : new_letter.upcase
-    else
-      letter
-    end
+    ALPHABETS.key?(letter.downcase) ? change_letter(letter) : letter
   end.join
 end
 
 def change_letter(letter)
-  letter_value = ALPHABETS[letter]
-  if letter_value + 3 > 26
-    ALPHABETS.key((letter_value - 26) + 3)
-  else
-    ALPHABETS.key(letter_value + 3)
-  end
+  value = ALPHABETS[letter.downcase] + 3
+  value = value - 26 if value > 23
+
+  letter.downcase == letter ? ALPHABETS.key(value) : ALPHABETS.key(value).upcase
 end
 
 p letter_changes("this long cake@&") == "wklv orqj fdnh@&"
