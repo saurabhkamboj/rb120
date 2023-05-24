@@ -14,13 +14,13 @@ require 'pry'
 
 module Displayable
   def display_welcome_message
-    puts "TIC TAC TOE"
+    puts "Welcome to TIC TAC TOE"
     puts ""
   end
 
-  def display_board(board)
-    system('clear') || system('cls')
-    puts "You are #{human.marker}. Computer is #{computer.marker}!"
+  def display_board(clear_screen)
+    clear if clear_screen
+    puts "Your marker is #{human.marker}. Computer's marker is #{computer.marker}!"
     puts ""
     puts "     |     |"
     puts "  #{board.get_square_at(1)}  |  #{board.get_square_at(2)}  |  #{board.get_square_at(3)}"
@@ -45,7 +45,11 @@ module Displayable
   end
 
   def display_goodbye_message
-    puts "Thank you for playing!"
+    puts "Thank you for playing TIC TAC TOE!"
+  end
+
+  def clear
+    system('clear') || system('cls')
   end
 end
 
@@ -53,6 +57,7 @@ class Board
   WINNING_LINES = [[1, 2, 3], [4, 5, 6], [7, 8, 9]] +
                   [[1, 4, 7], [2, 5, 8], [3, 6, 9]] +
                   [[1, 5, 9], [3, 5, 7]]
+
   attr_reader :squares
 
   def initialize
@@ -137,48 +142,61 @@ class TTTgame
     @computer = Player.new(COMPUTER_MARKER)
   end
 
-  def first_player_moves
+  def human_moves
     print "Choose a square between #{board.unmarked_square_keys}: "
     square = nil
 
     loop do
       square = gets.chomp.to_i
+
       break if board.unmarked_square_keys.include?(square)
-      print "Error! Please inout a valid choice: "
+      print "Error! Please choose a valid square: "
     end
 
     board.set_square_at(square, human.marker)
   end
 
-  def second_player_moves
+  def computer_moves
     board.set_square_at(board.unmarked_square_keys.sample, computer.marker)
   end
 
   def play_again?
-    print "Do you want to play again? "
-    input = gets.chomp.downcase
+    print "Do you want to play again (Yes/No)? "
+    answer = nil
 
-    ['y', 'yes'].any?(input)
+    loop do
+      answer = gets.chomp.downcase
+
+      break if ['yes', 'no'].any?(answer)
+      print "Error! Answer must be yes or no: "
+    end
+
+    answer == 'yes'
   end
 
   def play
     display_welcome_message
 
     loop do
+      display_board(false)
+
       loop do
-        first_player_moves
+        human_moves
         break if board.someone_won? || board.full?
 
-        second_player_moves
+        computer_moves
         break if board.someone_won? || board.full?
-        display_board(board)
+        display_board(true)
       end
       
-      display_board(board)
+      display_board(true)
       display_result(board)
+
       break unless play_again?
       board.reset
+      system('clear') || system('cls')
       puts "Let's play again!"
+      puts ""
     end
 
     display_goodbye_message
