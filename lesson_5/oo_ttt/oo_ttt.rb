@@ -1,3 +1,5 @@
+require 'pry'
+
 module Displayable
   def display_welcome_message
     puts "Welcome to TIC TAC TOE"
@@ -14,23 +16,28 @@ module Displayable
 
   def clear_and_display_board
     clear
-    puts "Your marker is #{human.marker}. " \
-      "Computer's marker is #{computer.marker}!"
-    puts ""
-    board.draw
-    puts ""
+    display_board
   end
 
   def display_result
-    if !!board.winning_marker
-      if board.winning_marker == TTTgame::HUMAN_MARKER
-        puts "You won!"
-      else
-        puts "Computer won!"
-      end
+    if board.winning_marker == human.marker
+      puts "You won!"
+      human.score += 1
+    elsif board.winning_marker == computer.marker
+      puts "Computer won!"
+      computer.score += 1
     else
       puts "It's a tie!"
+      Score.games_tied += 1
     end
+  end
+
+  def display_score
+    puts ""
+    puts "Your score - #{human.score}\n" \
+    "Computer's score - #{computer.score}\n" \
+    "Ties - #{Score.games_tied}"
+    puts ""
   end
 
   def display_goodbye_message
@@ -44,6 +51,17 @@ module Displayable
 
   def clear
     system('clear') || system('cls')
+  end
+
+  def joinor(squares, delimiter=',', last_delimiter='or')
+    case squares.size
+    when 0 then ''
+    when 1 then squares.first.to_s
+    when 2 then squares.join(" #{last_delimiter} ")
+    else
+      squares[-1] = "#{last_delimiter} #{squares.last}"
+      squares.join("#{delimiter} ")
+    end
   end
 end
 
@@ -79,6 +97,10 @@ class Board
 
   def []=(key, marker)
     @squares[key].marker = marker
+  end
+
+  def [](key)
+    @squares[key].marker
   end
 
   def unmarked_square_keys
@@ -137,32 +159,72 @@ class Square
   def marked?
     marker != INITIAL_MARKER
   end
+
+  def ==(value)
+    marker == value
+  end
 end
 
 class Player
-  attr_reader :marker
+  attr_accessor :marker
 
-  def initialize(marker)
-    @marker = marker
+  def initialize
+    @marker = nil
+    @score = Score.new
+  end
+
+  def score
+    @score.value
+  end
+
+  def score=(value)
+    @score.value = value
+  end
+end
+
+class Score
+  attr_accessor :value
+
+  WINNING_SCORE = 5
+
+  @@games_tied = 0
+
+  def initialize
+    @value = 0
+  end
+
+  def self.games_tied=(value)
+    @@games_tied = value
+  end
+
+  def self.games_tied
+    @@games_tied
   end
 end
 
 class TTTgame
-  HUMAN_MARKER = 'X'
-  COMPUTER_MARKER = 'O'
-
   include Displayable
 
   def initialize
     @board = Board.new
-    @human = Player.new(HUMAN_MARKER)
-    @computer = Player.new(COMPUTER_MARKER)
+    @human = Player.new
+    @computer = Player.new
     @@move_order = [human, computer]
   end
 
   def play
     display_welcome_message
-    main_game
+    choose_marker
+
+    loop do
+      main_game
+
+      break unless play_again?
+      human.score = 0
+      computer.score = 0
+      display_playagain_message
+    end
+
     display_goodbye_message
   end
 
@@ -170,16 +232,32 @@ class TTTgame
 
   attr_reader :board, :human, :computer
 
+  def choose_marker
+    print "Choose a marker (X/O): "
+    answer = ''
+
+    loop do
+      answer = gets.chomp.downcase
+
+      break if ['x', 'o'].any?(answer)
+      print "Error! Please choose a valid marker: "
+    end
+
+    human.marker = answer.upcase
+    computer.marker = answer == 'x' ? 'O' : 'X'
+  end
+
   def main_game
     loop do
-      display_board
+      clear_and_display_board
       player_move
       clear_and_display_board
       display_result
+      display_score
 
-      break unless play_again?
+      break if game_won?
+      sleep 5
       reset
-      display_playagain_message
     end
   end
 
@@ -206,7 +284,7 @@ class TTTgame
   end
 
   def human_moves
-    print "Choose a square between #{board.unmarked_square_keys}: "
+    print "Remaining positions [#{joinor(board.unmarked_square_keys)}]: "
     square = nil
 
     loop do
@@ -219,9 +297,43 @@ class TTTgame
     board[square] = human.marker
   end
 
+  def computer_ai(board, marker)
+    Board::WINNING_LINES.each do |line|
+      if board.squares.values_at(*line).count(marker) == 2 &&
+         board.squares.values_at(*line).count(Square::INITIAL_MARKER) == 1
+        return board.squares.select do |key, value|
+          line.include?(key) && value == Square::INITIAL_MARKER
+        end.keys[0]
+      end
+    end
+    nil
+  end
+
+  def computer_ai_moves(board, computer_marker, human_marker)
+    if !!computer_ai(board, computer_marker) # winning move
+      computer_ai(board, computer_marker)
+    elsif !!computer_ai(board, human_marker) # defensive move
+      computer_ai(board, human_marker)
+    elsif board[5] == Square::INITIAL_MARKER
+      5
+    else
+      board.unmarked_square_keys.sample
+    end
+  end
+
   def computer_moves
-    square = board.unmarked_square_keys.sample
+    square = computer_ai_moves(board, computer.marker, human.marker)
     board[square] = computer.marker
+  end
+
+  def game_won?
+    if human.score == Score::WINNING_SCORE
+      !(puts "Yay...you won the game!")
+    elsif computer.score == Score::WINNING_SCORE
+      !(puts "Computer won the game")
+    else
+      puts "Next round..."
+    end
   end
 
   def play_again?
