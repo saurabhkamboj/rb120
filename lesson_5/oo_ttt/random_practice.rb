@@ -11,7 +11,7 @@
     - Only operate over alphabets and account for case
     - Input: String
     - Output: String
-
+​
   Data structure
     - 'abc' > 'def'
     - a = 1, d = 4, 1 + 3
@@ -22,13 +22,13 @@
     - If letter_number + 3 > 26
      - new_letter_number = letter_number + 3 - 26
      - Z = 26, 26 + 3 - 26, 3 = c
-
+​
   Problem
     - Iterate over each word
     - Iterate over each letter in the word
     - Replace each letter based on algorithm
     - Join the letters and words, return that as result
-
+​
   Algorithm
     - Iterate over each word of the given string
       - Iterate over each letter of letter of the current word
@@ -37,7 +37,7 @@
       - Else return letter
       - Join the resultant array
     - Join the resultant array with spaces as separator
-
+​
     - To replace the letter
       - If ALPHABET_NUMBERS[letter] + 3 > 26
         new_letter_number = ALPHABET_NUMBERS[letter] + 3 - 26
@@ -52,7 +52,7 @@ def letter_changes(string)
   string.split.map do |word|
     word.chars.map do |letter|
       if ALPHABETS.keys.include?(letter.downcase)
-        new_letter = change_letter(letter)
+        new_letter = change_letter(letter.downcase)
         letter.downcase == letter ? new_letter : new_letter.upcase
       else
         letter
@@ -62,7 +62,29 @@ def letter_changes(string)
 end
 
 def change_letter(letter)
-  letter_value = ALPHABETS[letter.downcase]
+  letter_value = ALPHABETS[letter]
+  if letter_value + 3 > 26
+    ALPHABETS.key((letter_value - 26) + 3)
+  else
+    ALPHABETS.key(letter_value + 3)
+  end
+end
+
+# Alternate
+
+def letter_changes(string)
+  string.chars.map do |letter|
+    if ALPHABETS.keys.include?(letter.downcase)
+      new_letter = change_letter(letter.downcase)
+      letter.downcase == letter ? new_letter : new_letter.upcase
+    else
+      letter
+    end
+  end.join
+end
+
+def change_letter(letter)
+  letter_value = ALPHABETS[letter]
   if letter_value + 3 > 26
     ALPHABETS.key((letter_value - 26) + 3)
   else
