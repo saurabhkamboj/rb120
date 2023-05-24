@@ -1,26 +1,21 @@
-# Description: Tic Tac Toe is a 2-player board game played on a 3x3 grid. Players
-# take turns marking a square. The first player to mark 3 squares in a row wins.
-
-# Nounce: board, player, square, grid
-# Verbs: play and mark
-
-# Board
-# Square
-# Player
-# - Mark
-# - Play
-
-require 'pry'
-
 module Displayable
   def display_welcome_message
     puts "Welcome to TIC TAC TOE"
     puts ""
   end
 
-  def display_board(clear_screen: false)
-    clear if clear_screen
-    puts "Your marker is #{human.marker}. Computer's marker is #{computer.marker}!"
+  def display_board
+    puts "Your marker is #{human.marker}. " \
+      "Computer's marker is #{computer.marker}!"
+    puts ""
+    board.draw
+    puts ""
+  end
+
+  def clear_and_display_board
+    clear
+    puts "Your marker is #{human.marker}. " \
+      "Computer's marker is #{computer.marker}!"
     puts ""
     board.draw
     puts ""
@@ -64,6 +59,8 @@ class Board
     reset
   end
 
+  # rubocop:disable Metrics/AbcSize
+  # rubocop:disable Metrics/MethodLength
   def draw
     puts "     |     |"
     puts "  #{squares[1]}  |  #{squares[2]}  |  #{squares[3]}"
@@ -77,6 +74,8 @@ class Board
     puts "  #{squares[7]}  |  #{squares[8]}  |  #{squares[9]}"
     puts "     |     |"
   end
+  # rubocop:enable Metrics/AbcSize
+  # rubocop:enable Metrics/MethodLength
 
   def []=(key, marker)
     @squares[key].marker = marker
@@ -163,24 +162,7 @@ class TTTgame
 
   def play
     display_welcome_message
-
-    loop do
-      display_board
-
-      loop do
-        current_player_moves
-        break if board.someone_won? || board.full?
-        display_board(clear_screen: true)
-      end
-      
-      display_board(clear_screen: true)
-      display_result
-
-      break unless play_again?
-      reset
-      display_playagain_message
-    end
-
+    main_game
     display_goodbye_message
   end
 
@@ -188,14 +170,35 @@ class TTTgame
 
   attr_reader :board, :human, :computer
 
+  def main_game
+    loop do
+      display_board
+      player_move
+      clear_and_display_board
+      display_result
+
+      break unless play_again?
+      reset
+      display_playagain_message
+    end
+  end
+
+  def player_move
+    loop do
+      current_player_moves
+      break if board.someone_won? || board.full?
+      clear_and_display_board
+    end
+  end
+
   def current_player_moves
     if humans_turn?
       human_moves
-      @@move_order.reverse!
     else
       computer_moves
-      @@move_order.reverse!
     end
+
+    @@move_order.reverse!
   end
 
   def humans_turn?
