@@ -7,8 +7,8 @@
 # Board
 # Square
 # Player
-#   - Mark
-#   - Play
+# - Mark
+# - Play
 
 require 'pry'
 
@@ -18,7 +18,7 @@ module Displayable
     puts ""
   end
 
-  def display_board(clear_screen)
+  def display_board(clear_screen: false)
     clear if clear_screen
     puts "Your marker is #{human.marker}. Computer's marker is #{computer.marker}!"
     puts ""
@@ -40,7 +40,7 @@ module Displayable
     if board.someone_won?
       puts "#{board.detect_winner} won!"
     else
-      "It's a tie!"
+      puts "It's a tie!"
     end
   end
 
@@ -178,7 +178,7 @@ class TTTgame
     display_welcome_message
 
     loop do
-      display_board(false)
+      display_board
 
       loop do
         human_moves
@@ -186,15 +186,15 @@ class TTTgame
 
         computer_moves
         break if board.someone_won? || board.full?
-        display_board(true)
+        display_board(clear_screen: true)
       end
       
-      display_board(true)
+      display_board(clear_screen: true)
       display_result(board)
 
       break unless play_again?
       board.reset
-      system('clear') || system('cls')
+      clear
       puts "Let's play again!"
       puts ""
     end
