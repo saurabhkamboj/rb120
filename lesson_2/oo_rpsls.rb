@@ -1,33 +1,10 @@
-require 'pry'
-
-=begin
-  Keeping score
-    Right now, the game doesn't have very much dramatic flair. It'll be more interesting if we were playing up to, say, 10 points. Whoever reaches 10 points first wins. Can you build this functionality? We have a new noun -- a score. Is that a new class, or a state of an existing class? You can explore both options and see which one works better.
-
-  Add Lizard and Spock
-    This is a variation on the normal Rock Paper Scissors game by adding two more options - Lizard and Spock. The full explanation and rules are here.
-
-  Keep track of a history of moves
-    As long as the user doesn't quit, keep track of a history of moves by both the human and computer. What data structure will you reach for? Will you use a new class, or an existing class? What will the display output look like?
-
-    Breakdown
-      - Two levels of history, Game and match.
-      - Match stores human's and computer's moves.
-      - Each new game adds a new game to the score board.
-      - Each new match adds a new match to the score board associated wtih that game.
-      - Each player's move is associated with match.
-
-  Computer personalities
-    We have a list of robot names for our Computer class, but other than the name, there's really nothing different about each of them. It'd be interesting to explore how to build different personalities for each robot. For example, R2D2 can always choose "rock". Or, "Hal" can have a very high tendency to choose "scissors", and rarely "rock", but never "paper". You can come up with the rules or personalities for each robot. How would you approach a feature like this?
-=end
-
 VALID_CHOICES = %w(rock paper scissors lizard spock)
 OUTCOMES = {
-  rock: %w[scissors lizard],
-  paper: %w[rock spock],
-  scissors: %w[paper lizard],
-  lizard: %w[spock paper],
-  spock: %w[rock scissors]
+  rock: %w(scissors lizard),
+  paper: %w(rock spock),
+  scissors: %w(paper lizard),
+  lizard: %w(spock paper),
+  spock: %w(rock scissors)
 }
 
 module Storable
@@ -68,11 +45,57 @@ module Movable
   end
 
   def computer_moves
-    MOVES_HISTORY.map do |game, matches|
-      matches.map do |match, moves|
+    MOVES_HISTORY.map do |_, matches|
+      matches.map do |_, moves|
         moves[1]
       end
     end.flatten
+  end
+end
+
+module Displayable
+  def display_welcome_message
+    puts "Welcome to Rock, Paper, Scissors, Lizard, Spock!"
+  end
+
+  def display_moves
+    puts "\nYou chose #{human.move}."
+    puts "#{computer.name} chose #{computer.move}}."
+  end
+
+  # rubocop:disable Metrics/AbcSize
+  def display_winner
+    if human.move > computer.move
+      puts "You won!"
+      human.score += 1
+    elsif computer.move > human.move
+      puts "#{computer.name} won!"
+      computer.score += 1
+    else
+      puts "It's a tie."
+      Score.games_tied += 1
+    end
+  end
+  # rubocop:enable Metrics/AbcSize
+
+  def display_score
+    puts "\nScore
+    #{human.name} - #{human.score}
+    #{computer.name} - #{computer.score}
+    Ties - #{Score.games_tied}"
+  end
+
+  def display_history
+    Storable::MOVES_HISTORY.each do |game, matches|
+      puts "Game #{game}"
+      matches.each do |match, moves|
+        puts "Match #{match} => #{moves}"
+      end
+    end
+  end
+
+  def display_goodbye_message
+    puts "\nThank you for playing #{human.name}."
   end
 end
 
@@ -130,6 +153,7 @@ end
 
 class Computer < Player
   include Movable
+  include Displayable
 
   def set_name
     self.name = %w(Computron R2D2 Hal).sample
@@ -159,6 +183,7 @@ end
 
 class Score
   attr_accessor :value
+
   WINNING_SCORE = 2
 
   @@games_tied = 0
@@ -188,22 +213,11 @@ class RPSGame
   def play
     loop do
       Storable::Game.new
-
-      loop do
-        Storable::Match.new
-        human.move!
-        computer.move!
-        display_winner
-        display_score
-        break if game_won?
-        
-        sleep 5
-        system('clear') || system('cls')
-      end
+      main_game
 
       human.score = 0
       computer.score = 0
-      
+
       break if play_again?
     end
 
@@ -213,31 +227,18 @@ class RPSGame
 
   protected
 
-  def display_welcome_message
-    puts "Welcome to Rock, Paper, Scissors, Lizard, Spock!"
-  end
+  def main_game
+    loop do
+      Storable::Match.new
+      human.move!
+      computer.move!
+      display_winner
+      display_score
+      break if game_won?
 
-  def display_winner
-    puts "\nYou chose #{human.move}."
-    puts "#{computer.name} chose #{computer.move}."
-
-    if human.move > computer.move
-      puts "You won!"
-      human.score += 1
-    elsif computer.move > human.move
-      puts "#{computer.name} won!"
-      computer.score += 1
-    else
-      puts "It's a tie."
-      Score.games_tied += 1
+      sleep 5
+      system('clear') || system('cls')
     end
-  end
-
-  def display_score
-    puts "\nScore
-    #{human.name} - #{human.score}
-    #{computer.name} - #{computer.score}
-    Ties - #{Score.games_tied}"
   end
 
   def game_won?
@@ -255,19 +256,6 @@ class RPSGame
     input = gets.chomp.downcase
 
     ['n', 'no'].any?(input)
-  end
-
-  def display_history
-    Storable::MOVES_HISTORY.each do |game, matches|
-      puts "Game #{game}"
-      matches.each do |match, moves|
-        puts "Match #{match} => #{moves}"
-      end
-    end
-  end
-
-  def display_goodbye_message
-    puts "\nThank you for playing #{human.name}."
   end
 end
 
